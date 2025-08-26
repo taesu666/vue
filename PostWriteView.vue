@@ -114,9 +114,9 @@ async function getFilename(files) {
   await base24()
 }
 
-function base24(){
-  return new Promise((resolve, reject) =>{
-      let reader = new FileReader()
+function base24() {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader()
     reader.onload = e => {
       resolve(e.target.result)
 
@@ -165,16 +165,39 @@ async function addPost() {
 }
 
 async function requestPostAdd(item) {
+  console.log(`이미지 개수 ${selectedFile.value.length}`)
   try {
 
-    let response = await upload(selectedFile.value, (progress) => {
-      console.log(`업로드 진행률 ㅣ ${progress}`)
+    //사진 없으면 그냥 그댈로 넣는 방법
+    let response = null;
+
+    // 유효한 파일인지 확인
+    if (
+      selectedFile.value &&
+      selectedFile.value.name &&
+      selectedFile.value.type
+    ) {
+      response = await upload(selectedFile.value, (progress) => {
+        console.log(`업로드 진행률 ㅣ ${progress}`);
+      });
+
+      console.log(`업로드 응답 -> ${JSON.stringify(response)}`);
+      // 사진있으면 넣고, 아님 null
+      if (response?.data?.filename) {
+        item.thumbnail = `${requestConfig.baseUrl}${response.data.filename}`;
+      }
+    } else {
+      item.thumbnail = null
+    }
+
+    response = await axios({
+      method: 'post',
+      baseURL: 'http://localhost:8001',
+      url: 'post/v1/modify',
+      data: item,
+      timeout: 5000,
+      responseType: 'json'
     })
-
-    console.log(`업로드 응답 -> ${JSON.stringify(response)}`)
-
-    item.thumbnail = `${requestConfig.baseUrl}${response.data.filename}`
-
     response = await axios({
       method: 'post',
       baseURL: 'http://localhost:8001',
@@ -195,16 +218,42 @@ async function requestPostAdd(item) {
 
 async function requestPostModify(item) {
   try {
+    console.log(`사진 url : ${item.thumbnail}`)
 
-    let response = await upload(selectedFile.value, (progress) => {
-      console.log(`업로드 진행률 ㅣ ${progress}`)
-    })
+    // let response = await upload(selectedFile.value, (progress) => {
+    //   console.log(`업로드 진행률 ㅣ ${progress}`)
+    // })
 
-    console.log(`업로드 응답 -> ${JSON.stringify(response)}`)
+    // console.log(`업로드 응답 -> ${JSON.stringify(response)}`)
 
-    item.thumbnail = `${requestConfig.baseUrl}${response.data.filename}`
+    // if (response?.data?.filename) {
+    //   item.thumbnail = `${requestConfig.baseUrl}${response.data.filename}`;
+    // } else {
+    //   console.log("유효한 파일이 없으므로 기존 썸네일을 유지합니다.");
+    // }
+   
+    //사진 없으면 그냥 그댈로 넣는 방법
+    let response = null;
 
-     response = await axios({
+    // 유효한 파일인지 확인
+    if (
+      selectedFile.value &&
+      selectedFile.value.name &&
+      selectedFile.value.type
+    ) {
+      response = await upload(selectedFile.value, (progress) => {
+        console.log(`업로드 진행률 ㅣ ${progress}`);
+      });
+
+      console.log(`업로드 응답 -> ${JSON.stringify(response)}`);
+      // 사진있으면 넣고, 아님 null
+      if (response?.data?.filename) {
+        item.thumbnail = `${requestConfig.baseUrl}${response.data.filename}`;
+      }
+    } else {
+      item.thumbnail = null
+    }
+    response = await axios({
       method: 'post',
       baseURL: 'http://localhost:8001',
       url: 'post/v1/modify',
@@ -212,7 +261,7 @@ async function requestPostModify(item) {
       timeout: 5000,
       responseType: 'json'
     })
-   
+
 
     console.log(`응답 -> ${JSON.stringify(response.data)}`);
     goToPost()
