@@ -6,13 +6,13 @@
       <div v-for="(item, index) in posts" :key="item.id" class="card post-card">
 
         <div class="card-body m-0 p-4">
-          <img :src="item.thumbnail"class="h-300px">
-
+          <!-- 사진url이 있거나 url시작이 http일 경우에만 실행 -->
+          <img v-if="item.thumbnail && item.thumbnail.startsWith('http')" :src="item.thumbnail" />
           <div class="p-4">
             <div class="d-flex flex-row mb-5">
-              <span class="fw-bold fs-1">{{ item.title }}</span>       
-                <button class="btn btn-sm btn-primary ms-4" @click="modifyPost(index)">수정</button>
-                <button class="btn btn-sm btn-secondary ms-4" @click="removePost(index)">삭제</button>
+              <span class="fw-bold fs-1">{{ item.title }}</span>
+              <button class="btn btn-sm btn-primary ms-4" @click="modifyPost(index)">수정</button>
+              <button class="btn btn-sm btn-secondary ms-4" @click="removePost(index)">삭제</button>
             </div>
 
             <span class="text-muted fs-4">{{ item.content }}</span>
